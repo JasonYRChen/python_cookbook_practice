@@ -1,3 +1,10 @@
+"""
+    This program demonstrates setting decorator's parameters at runtime.
+    The method is to build a series of setting functions with 'nonlocal'
+    declaration inside, and then 'setattr' those functions to inner
+    function as its attributes.
+"""
+
 from functools import wraps
 
 
@@ -12,15 +19,17 @@ def weighted_factor(weight=1, to_print=True):
                 print(f'Result after weighted: {weighted_result}')
             return weighted_result
 
-        def set_weight(value):
+        def set_weight(value): # helper to set decorator's parameter
             nonlocal weight
             weight = value
 
-        def set_to_print(boolean):
+        def set_to_print(boolean): # helper to set decorator's parameter
             nonlocal to_print
             to_print = boolean
 
-        methods = [set_weight, set_to_print]
+        # setattr functions to inner
+        methods = (method for method in locals().values() 
+                   if method != inner and isinstance(method, type(inner)))
         for method in methods:
             setattr(inner, method.__name__, method)
 
@@ -38,4 +47,4 @@ add.set_weight(10)
 print(add(2, 5))
 add.set_to_print(True)
 print(add(2, 5))
-
+print(add.__dict__)
